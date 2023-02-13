@@ -12,4 +12,75 @@ II/ Structural Pattern
 
 
 III/ Behavioral Pattern
-	1/Strategy
+	1/Strategy: Định nghĩa một tập hợp các thuật toán giống nhau, encapsulate chúng và khiến chúng có thể thay thế cho nhau. Strategy làm cho phần thuật toán độc lập khỏi client sử dụng nó.
+	Vd: class Context, interface StrategyInterface, multi strategy(FirstConcreteStrategy, SecondConcreteStrategy, ...)
+
+	```
+		<?php
+
+		interface StrategyInterface {
+		    /**
+		     * Do something.
+		     */
+		    public function handle();
+		}
+
+		class Context {
+		    /**
+		     * @var StrategyContract
+		     */
+		    private $strategy;
+		   
+
+		    /**
+		     * Context constructor.
+		     * 
+		     * @param StrategyContract $strategy
+		     * @throws Exception
+		     */
+		    public function __construct(StrategyInterface $strategy)
+		    {
+		        if (isset($this->strategy)) {
+		            throw new Exception("Contract is already present.");
+		        }
+		        $this->strategy = $strategy;
+		    }
+
+		    /**
+		     * Call strategy handle() method.
+		     */
+		    public function handle()
+		    {
+		        $this->strategy->handle();
+		    }
+		}
+
+		class FirstConcreteStrategy implements StrategyInterface {
+		    
+		    /**
+		     * {@inheritdoc}
+		     */
+		    public function handle()
+		    {
+		        echo PHP_EOL . 'DOING SOMETHING' . PHP_EOL;
+		    }
+		}
+
+		class SecondConcreteStrategy implements StrategyInterface {
+		    
+		    /**
+		     * {@inheritdoc}
+		     */
+		    public function handle() {
+		        echo PHP_EOL . 'DOING SOMETHING SLIGHT DIFFERENTLY' . PHP_EOL;
+		    }
+		}
+
+		//
+		$context = new Context(new FirstConcreteStrategy());
+		$context->handle();
+
+		$second_context = new Context(new SecondConcreteStrategy());
+		$second_context->handle();
+
+	```
