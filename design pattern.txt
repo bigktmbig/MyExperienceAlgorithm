@@ -5,7 +5,62 @@
 =========================================================================
 
 I/ Creational Pattern
-	1/Singleton
+	1/Singleton: Đảm bảo chỉ duy nhất một thể hiện (instance) được tạo ra và nó sẽ cung cấp cho bạn một method để có thể truy xuất được thể hiện duy nhất đó mọi lúc mọi nơi trong chương trình.
+	Vd: 
+		<?php
+		class Singleton
+		{
+			private static $instances = [];
+		    public static function getInstance()
+		    {
+		        $cls = static::class;
+		        if (!isset(self::$instances[$cls])) {
+		            self::$instances[$cls] = new static();
+		        }
+
+		        return self::$instances[$cls];
+		    }
+
+		    /**
+		     * Protected constructor to prevent creating a new instance of the
+		     * *Singleton* via the `new` operator from outside of this class.
+		     */
+		    protected function __construct()
+		    {
+		    }
+
+		    /**
+		     * Private clone method to prevent cloning of the instance of the
+		     * *Singleton* instance.
+		     *
+		     * @return void
+		     */
+		    private function __clone()
+		    {
+		    }
+
+		    /**
+		     * Private unserialize method to prevent unserializing of the *Singleton*
+		     * instance.
+		     *
+		     * @return void
+		     */
+		    private function __wakeup()
+		    {
+		    }
+		}
+
+		class SingletonChild extends Singleton
+		{
+		}
+
+		$obj = Singleton::getInstance();
+		var_dump($obj === Singleton::getInstance());             // bool(true)
+
+		$childObj = SingletonChild::getInstance();
+		var_dump($childObj === Singleton::getInstance());      // bool(false)
+
+		var_dump($childObj === SingletonChild::getInstance()); // bool(true)
 
 
 II/ Structural Pattern
@@ -15,7 +70,6 @@ III/ Behavioral Pattern
 	1/Strategy: Định nghĩa một tập hợp các thuật toán giống nhau, encapsulate chúng và khiến chúng có thể thay thế cho nhau. Strategy làm cho phần thuật toán độc lập khỏi client sử dụng nó.
 	Vd: class Context, interface StrategyInterface, multi strategy(FirstConcreteStrategy, SecondConcreteStrategy, ...)
 
-	```
 		<?php
 
 		interface StrategyInterface {
@@ -82,5 +136,3 @@ III/ Behavioral Pattern
 
 		$second_context = new Context(new SecondConcreteStrategy());
 		$second_context->handle();
-
-	```
