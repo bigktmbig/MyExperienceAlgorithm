@@ -67,7 +67,8 @@ II/ Structural Pattern
 
 
 III/ Behavioral Pattern
-	1/Strategy: Định nghĩa một tập hợp các thuật toán giống nhau, encapsulate chúng và khiến chúng có thể thay thế cho nhau. Strategy làm cho phần thuật toán độc lập khỏi client sử dụng nó.
+	1/Strategy: Mẫu thiết kế dành cho hành động lặp lại nhiều lần lên method, function, tách nó ra thành 1 phần độc lập. 
+	Định nghĩa, kế thừa và xử lý theo từng loại riêng biệt.
 	Vd: class Context, interface StrategyInterface, multi strategy(FirstConcreteStrategy, SecondConcreteStrategy, ...)
 
 		<?php
