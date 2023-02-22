@@ -6,7 +6,7 @@
 
 I/ Creational Pattern: Nhóm khởi tạo – 5 mẫu gồm: Factory Method, Abstract Factory, Builder, Prototype, Singleton.
 	5/ Singleton: Đảm bảo chỉ duy nhất một thể hiện (instance) được tạo ra và nó sẽ cung cấp cho bạn một method để có thể truy xuất được thể hiện duy nhất đó mọi lúc mọi nơi trong chương trình.
-	- Ex: 
+	- Ex:
 		<?php
 		class Singleton
 		{
@@ -102,7 +102,6 @@ II/ Structural Pattern: Nhóm cấu trúc – 7 mẫu gồm: Adapter, Bridge, Co
 		}
 
 		/* Client */
-
 		class You {
 		    public static void main(String[] args) {
 		        ComputerFacade computer = new ComputerFacade();
@@ -110,12 +109,10 @@ II/ Structural Pattern: Nhóm cấu trúc – 7 mẫu gồm: Adapter, Bridge, Co
 		    }
 		}
 
-III/ Behavioral Pattern: Nhóm tương tác/ hành vi – 11 mẫu) gồm: Interpreter, Template Method, Chain of Responsibility, Command, Iterator, Mediator, Memento, Observer, State, Strategy và Visitor.
-	1/Strategy: 
-	- Define a family of algorithms, encapsulate each one, and make them interchangeable. Strategy lets the algorithm vary independently from the clients that use it.
-	- Định nghĩa một tập hợp các thuật toán giống nhau, đóng gói chúng và khiến chúng có thể thay thế cho nhau. Strategy làm cho phần thuật toán độc lập khỏi client sử dụng nó.
-	=> Khi những hành vi (behavior, method, function) của một đối tượng thay đổi với những thiết lập khác nhau.
-	- Ex: class Context, interface StrategyInterface, multi strategy(FirstConcreteStrategy, SecondConcreteStrategy, ...)
+III/ Behavioral Pattern
+	1/Strategy: Mẫu thiết kế dành cho hành động lặp lại nhiều lần lên method, function, tách nó ra thành 1 phần độc lập.
+	Định nghĩa, kế thừa và xử lý theo từng loại riêng biệt.
+	Vd: class Context, interface StrategyInterface, multi strategy(FirstConcreteStrategy, SecondConcreteStrategy, ...)
 
 		<?php
 
@@ -208,7 +205,7 @@ IV/ Other Pattern
 			use ProductRepositoryInterface;
 
 			class ProductController extends Controller
-			{    
+			{
 				protected $productRepository;
 
 				public function __construct(ProductRepositoryInterface $productRepository)
