@@ -4,9 +4,9 @@
 =========================================================================
 =========================================================================
 
-I/ Creational Pattern
-	1/Singleton: Đảm bảo chỉ duy nhất một thể hiện (instance) được tạo ra và nó sẽ cung cấp cho bạn một method để có thể truy xuất được thể hiện duy nhất đó mọi lúc mọi nơi trong chương trình.
-	Vd: 
+I/ Creational Pattern: Nhóm khởi tạo – 5 mẫu gồm: Factory Method, Abstract Factory, Builder, Prototype, Singleton.
+	5/ Singleton: Đảm bảo chỉ duy nhất một thể hiện (instance) được tạo ra và nó sẽ cung cấp cho bạn một method để có thể truy xuất được thể hiện duy nhất đó mọi lúc mọi nơi trong chương trình.
+	- Ex: 
 		<?php
 		class Singleton
 		{
@@ -63,12 +63,59 @@ I/ Creational Pattern
 		var_dump($childObj === SingletonChild::getInstance()); // bool(true)
 
 
-II/ Structural Pattern
+II/ Structural Pattern: Nhóm cấu trúc – 7 mẫu gồm: Adapter, Bridge, Composite, Decorator, Facade, Flyweight và Proxy.
+	5/ Facade: Cung cấp class/function có những tính năng đơn giản hơn, để che dấu những tập xử lý phức tạp của nhiều class/function con.
+	- Ex:
+		class CPU {
+		    public void freeze() { ... }
+		    public void jump(long position) { ... }
+		    public void execute() { ... }
+		}
 
+		class HardDrive {
+		    public byte[] read(long lba, int size) { ... }
+		}
 
-III/ Behavioral Pattern
-	1/Strategy: Định nghĩa một tập hợp các thuật toán giống nhau, encapsulate chúng và khiến chúng có thể thay thế cho nhau. Strategy làm cho phần thuật toán độc lập khỏi client sử dụng nó.
-	Vd: class Context, interface StrategyInterface, multi strategy(FirstConcreteStrategy, SecondConcreteStrategy, ...)
+		class Memory {
+		    public void load(long position, byte[] data) { ... }
+		}
+
+		/* Facade */
+
+		class ComputerFacade {
+		    private CPU processor;
+		    private Memory ram;
+		    private HardDrive hd;
+
+		    public ComputerFacade() {
+		        this.processor = new CPU();
+		        this.ram = new Memory();
+		        this.hd = new HardDrive();
+		    }
+
+		    public void start() {
+		        processor.freeze();
+		        ram.load(BOOT_ADDRESS, hd.read(BOOT_SECTOR, SECTOR_SIZE));
+		        processor.jump(BOOT_ADDRESS);
+		        processor.execute();
+		    }
+		}
+
+		/* Client */
+
+		class You {
+		    public static void main(String[] args) {
+		        ComputerFacade computer = new ComputerFacade();
+		        computer.start();
+		    }
+		}
+
+III/ Behavioral Pattern: Nhóm tương tác/ hành vi – 11 mẫu) gồm: Interpreter, Template Method, Chain of Responsibility, Command, Iterator, Mediator, Memento, Observer, State, Strategy và Visitor.
+	1/Strategy: 
+	- Define a family of algorithms, encapsulate each one, and make them interchangeable. Strategy lets the algorithm vary independently from the clients that use it.
+	- Định nghĩa một tập hợp các thuật toán giống nhau, đóng gói chúng và khiến chúng có thể thay thế cho nhau. Strategy làm cho phần thuật toán độc lập khỏi client sử dụng nó.
+	=> Khi những hành vi (behavior, method, function) của một đối tượng thay đổi với những thiết lập khác nhau.
+	- Ex: class Context, interface StrategyInterface, multi strategy(FirstConcreteStrategy, SecondConcreteStrategy, ...)
 
 		<?php
 
@@ -136,3 +183,81 @@ III/ Behavioral Pattern
 
 		$second_context = new Context(new SecondConcreteStrategy());
 		$second_context->handle();
+
+IV/ Other Pattern
+1/ Repository
+	- Là tầng trung gian giữa business logic và data access
+	- Ex:
+		+ Provider config:
+			'providers' => [
+			...
+			    App\Providers\RepositoryServiceProvider::class,
+			],
+
+		+ New provider service
+			use App\Contracts\Repositories\PropductRepositoryInterface;
+			use App\Repositories\ProductRepository;
+
+			public function register()
+			{
+			   $this->app->bind(ProductRepositoryInterface::class, ProductRepository::class);
+			}
+
+		+ Controller:
+			namespace App\Http\Controllers;
+			use ProductRepositoryInterface;
+
+			class ProductController extends Controller
+			{    
+				protected $productRepository;
+
+				public function __construct(ProductRepositoryInterface $productRepository)
+				{
+					$this->productRepository = $productRepository;
+				}
+
+				public function getProduct()
+				{
+					$products = $this->productRepository->getProductOrderById();
+					return view('product.index', compact('products'));
+				}
+			}
+
+		+ Repository
+			namespace App\Repositories;
+​
+			use App\Models\Product;
+			​
+			class ProductRepository implements ProductRepositoryInterface
+			{
+			{
+			    //override
+			    public function getProductOrderById()
+			    {
+			        return Product::orderBy('id', 'desc')->get();
+			    }
+			}
+
+		+ Base interface
+			namespace App\Contracts\Repositories;
+
+			interface BaseRepositoryInterface
+			{
+			    public function model();
+			    public function getAll();
+			    public function create(array $data);
+			    public function show(int $id);
+			    public function edit(int $id);
+			    public function delete(int $id);
+			    ....
+			}
+
+		+ interface
+			namespace App\Contracts\Repositories;
+
+			interface ProductRepositoryInterface extends BaseRepositoryInterface
+			{
+			    public function getFulfilledProduct(int $productId);
+			    public function getProductTags(int $productId);
+			    .....
+			}
