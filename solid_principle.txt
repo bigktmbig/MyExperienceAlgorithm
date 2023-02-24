@@ -1,0 +1,265 @@
+I/ Một vài điều mà ta hay được nghe để code sạch đẹp:
+
+	- Don’t Repeat Yourself (DRY), không nên viết lặp code trong cùng 1 chương trình mà nên tách ra dùng các abtract class hoặc interface.
+	- Đóng gói những phần dễ bị thay đổi
+	- Các lớp không nên phụ thuộc quá nhiều vào nhau (loosely coupling).
+	- Composition over inheritance, tức là kiểu nên sử dụng đa hình (polymorphic) hơn là thừa kế (inheritance) code bằng cách là chứa nhiều cách thể hiện khác nhau của một hành vi (function) thay cho kế thừa từ 1 lớp cha.
+	- Các lớp sử dụng nên làm việc với thành phần trừu tượng hơn là sử dụng trực tiếp lớp cài đặt.
+	- Đặt cho đối tượng tự thực hiện hành vi của nó thay vì áp một hành vi lên đối tượng.
+
+II/ 5 nguyên tắc thiết kế hướng đối tượng mà như tiêu đề đã nói, người ta gọi là SOLID:
+	- Single Responsibility Principle (SRP)
+	- Open-Closed Principle (OCP)
+	- Liskov's Substitution Principle (LSP)
+	- Interface Segregation Principle (ISP)
+	- Dependency Inversion Principle (DIP)
+
+III/ Chi tiết
+	1/ Single Responsibility Principle (SRP): Nguyên lý này của 2 ông Tom DeMarco và Meilir Page-Jones nghĩ ra trong lúc làm việc. Đại khái hiểu nó là mỗi lớp chỉ nên làm 1 nhiệm vụ. Mỗi nhiệm vụ không phải chỉ là 1 phương thức, nó có thể là một nhóm các phương thức có các hành động liên quan đến nhau hoặc hỗ trợ lẫn nhau.
+	
+	- Ex:
+		+ Bad:
+			class Item
+			{
+			    public $gold;
+			    
+			    public function regenerate() { // hồi phục };
+			    public function attackPhysic() { // tấn công vật lý };
+			    public function attackMagic() { // tấn công phép };
+			    public function increaseArmor() { // tăng giáp};
+			    public function increaseMagicResitant() { // tăng kháng phép };
+			    public function increaseHealth() { // tăng máu };
+			}
+
+		+ Good:
+			abstract class Item
+			{
+			    public $gold;
+			}
+
+			class RegenerationItem extends Item
+			{
+			    public function regenerate() { // hồi phục };
+			}
+
+			class AttackItem extends Item
+			{
+			    public function attackPhysic() { // tấn công vật lý };
+			    public function attackMagic() { // tấn công phép };
+			}
+
+			class DefenseItem extends Item
+			{
+			    public function increaseArmor() { // tăng giáp};
+			    public function increaseMagicResitant() { // tăng kháng phép };
+			    public function increaseHealth() { // tăng máu };
+			}
+
+	2/ Open-Closed Principle (OCP): Nguyên lý đóng mở này được đề xuất bởi Bertrand Meyer. Đại khái có thể hiểu là chúng ta sẽ thiết kế các lớp sao cho có thể dễ dàng mở rộng và chỉ cần thêm code chứ không phải sửa code. Nguyên tắc chính là :
+		+ Open for extensibility: Sẵn sàng mở rộng để thêm chức năng.
+		+ Closed for modification: đóng gói và không cho phép thay đổi code hiện tại.
+	- Ex:
+		+ Bad: 
+			abstract class Damage 
+			{
+			  // sth  
+			}
+
+			class Physic extends Damage
+			{
+			    public $physicRegistance;
+			}
+
+			class Magic extends Damage
+			{
+			    public $magicRegistance;
+			}
+
+			class DamageCalculator
+			{
+			    public function damageTaken(Damage $damage, $damageReceive) {
+			        $dameTaken = 0;
+			        if ($damage instanceof Physic) {
+			            $dameTaken = $damageReceive * $damage->physicRegistance;
+			        }
+			        
+			        if ($damage instanceof Magic) {
+			            $dameTaken = $damageReceive * $damage->magicRegistance;
+			        }
+			        
+			        return $dameTaken;
+			    }
+			}
+
+		+ Good:
+			abstract class Damage
+			{
+			    abstract public function resistance();
+			}
+
+			class Physic extends Damage
+			{
+			    private $physicRegistance;
+			    
+			    public function resistance() {
+			         return $physicRegistance;
+			    };
+			}
+
+			class Magic extends Damage
+			{
+			    private $magicRegistance;
+			    
+			    public function resistance() {
+			         return $magicRegistance;
+			    };
+			}
+
+			class DamageCalculator
+			{
+			    public function damageTaken(Damage $damage, $damageReceive) {
+			        $dameTaken = $damageReceive * $damage->resistance() ?? 0;
+			        
+			        return $dameTaken;
+			    }
+			}
+
+	3. Liskov's Substitution Principle (LSP): Nguyên lý này của ông Barbara Liskov. Đại khái ông này bảo là khi kế thừa, các lớp con phải đảm bảo được không làm thay đổi chức năng của lớp cha dưới góc nhìn người dùng.
+	- Ex:
+		+ Bad:
+			abstract class Creature
+			{
+			    int $name;
+			    
+			    abstract public function gainLevel();
+			}
+
+			class Injoker extends Creature
+			{
+			    public function gainLevel() { // tăng level bằng cách nào đó =.= }
+			}
+
+			class JungleCreep extends Creature
+			{
+			    public function gainLevel() { //  không tăng được level (em xin anh e chỉ là lính mà lấy level kiểu gì =.=) throw Exception... }
+			}
+
+		+ Good:
+			abstract class Creature
+			{
+			    int $name;
+			}
+
+			interface Levelable
+			{
+			    public function gainLevel();
+			}
+
+			class Injoker extends Creature implements Levelable
+			{
+			    public function gainLevel() { // lấy level bằng cách nào đó =.= }
+			}
+
+			class JungleCreep extends Creature
+			{
+			    // sth...
+			}
+
+	4. Interface Segregation Principle (ISP): Nguyên lý này của Robert Cecil Martin hay còn gọi là Uncle Bob. Đại khái ông này muốn nói rằng, với các interface, ta nên tách ra thành nhiều interface, trong đó mỗi interface sẽ thể hiện 1 vai trò đặc trưng, phục vụ cho một nhiệm vụ riêng biệt.
+	- Ex:
+		+ Bad:
+			interface IsCreature
+			{
+			    public function attack();
+			    public function reborn();
+			}
+
+			class Injoker implements IsCreature
+			{
+			    public function attack() { // tấn công};
+			    public function reborn() { // hồi sinh};
+			}
+
+			class JungleCreep implements IsCreature
+			{
+			    public function attack() { // tấn công};
+			    public function reborn() { // ra đi không ngày trở lại};
+			}
+
+		+ Good:
+			interface Attackable
+			{
+			    public function attack();
+			}
+
+			interface Rebornable
+			{
+			    public function reborn();
+			}
+
+			interface IsCreature extends Attackable, Rebornable
+			{
+			}
+
+			class Injoker implements IsCreature
+			{
+			    public function attack() { // tấn công};
+			    public function reborn() { // hồi sinh};
+			}
+
+			class JungleCreep implements Attackable
+			{
+			    public function attack() { // tấn công};
+			}
+
+	5. Dependency Inversion Principle (DIP): Cái này cũng vẫn là nguyên lý của Uncle Bob. Nguyên lý này nói rằng, những thành phần có sự khái quát cao hơn thì không nên phụ thuộc trực tiếp vào các thành phần mang tính cụ thể hơn.
+	- Ex: 
+		+ Bad:
+			class SeaPlayer
+			{
+			    public function acceptGame(){ // click nút accept trên màn hình };
+			}
+
+			class SeaChannel
+			{
+			    public function getPlayersInRoom() { // đưa thằng player vào phòng};
+			}
+
+			class Room
+			{
+			   public function createSeaRoom(SeaPlayer $player, SeaChannel $channel) {
+			       $player->acceptGame();
+			       $channel->getPlayersInRoom();
+			   }
+			}
+
+		+ Good:
+			interface Player
+			{
+			    public function acceptGame();
+			}
+
+			interface Channel
+			{
+			    public function getPlayersInRoom();
+			}
+
+			class SeaPlayer implements Player
+			{
+			    public function acceptGame() { // click nút accept trên màn hình };
+			}
+
+			class SeaChannel implements Channel
+			{
+			    public function getPlayersInRoom() { // đưa thằng player vào phòng};
+			}
+
+			class Room
+			{
+			   public function createRoom(Player $player, Channel $channel) {
+			       $player->acceptGame();
+			       $channel->getPlayersInRoom();
+			   }
+			}
+
+
