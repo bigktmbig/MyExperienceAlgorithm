@@ -5,6 +5,113 @@
 =========================================================================
 
 I/ Creational Pattern: Nhóm khởi tạo – 5 mẫu gồm: Factory Method, Abstract Factory, Builder, Prototype, Singleton.
+	2/ Abstract Factory: Cung cấp một interface có chức năng tạo ra các đối tượng liên quan mà không chỉ ra những lớp cụ thể nào ở thời điểm thiết kế.
+	- Ex:
+	<?php
+	abstract class AnimalFactory
+	{
+	    public abstract function CreatePet();
+	    public abstract function CreateWild();
+	}
+
+	class DogAnimalFactory extends AnimalFactory
+	{
+	    public function CreatePet()
+	    {
+	        return 'Create Dog';
+	    }
+
+	    public function CreateWild()
+	    {
+	        return 'Create AfricanWildDog';
+	    }
+	}
+
+	class CatAnimalFactory extends AnimalFactory
+	{
+	    public function CreatePet()
+	    {
+	        return 'Create Cat';
+	    }
+
+	    public function CreateWild()
+	    {
+	        return 'Create Tiger';
+	    }
+	}
+
+	class MyAnimal
+	{
+		private $factory;
+		
+	    function __construct(AnimalFactory $animalFactory) {
+	        $this->factory = $animalFactory;
+	    }
+
+	    public function getPet()
+	    {
+	        return $this->factory->CreatePet();
+	    }
+
+	    public function getWild()
+	    {
+	        return $this->factory->CreateWild();
+	    }
+	}
+
+	//
+	$animal = new MyAnimal(new CatAnimalFactory());
+	$cat = $animal->getPet();
+	$tiger = $animal->getWild();
+
+	var_dump($cat);
+	var_dump($tiger);
+	
+	4/ Prototype pattern: 
+	- The prototype pattern is a creational design pattern in software development. It is used when the type of objects to create is determined by a prototypical instance, which is cloned to produce new objects.
+	- Mục đích của pattern này là tạo ra một đối tượng mới bằng cách sao chép một nguyên mẫu (nôm na là một đối tượng khác).
+	- Ex:
+	<?php
+	class BookPrototype {
+		protected $title;
+		protected $category = 'IT';
+
+		public function __construct()
+		{
+			
+		}
+
+		public function setTitle($title)
+		{
+			$this->title = $title;
+		}
+
+		public function getTitle()
+		{
+			return $this->title;
+		}
+
+		public function __clone()
+		{
+			# code...
+		}
+	}
+
+	$itBook = new BookPrototype();
+	$itBook->setTitle('Learning PHP Prototype Pattern');
+	
+	// Shallow copy
+	$itBookClone = $itBook;
+	$itBookClone->setTitle('PHP Master');
+	echo $itBook->getTitle(); 		// 'PHP Master'
+	echo $itBookClone->getTitle(); 	// 'PHP Master'
+
+	// Deep copy
+	$itBookClone = clone $itBook;
+	$itBookClone->setTitle('PHP Master');
+	echo $itBook->getTitle(); 		// 'Learning PHP Prototype Pattern'
+	echo $itBookClone->getTitle(); 	// 'PHP Master'
+	
 	5/ Singleton: Đảm bảo chỉ duy nhất một thể hiện (instance) được tạo ra và nó sẽ cung cấp cho bạn một method để có thể truy xuất được thể hiện duy nhất đó mọi lúc mọi nơi trong chương trình.
 	- Ex:
 		<?php
