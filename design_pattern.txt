@@ -291,6 +291,7 @@ III/ Behavioral Pattern
 IV/ Other Pattern
 1/ Repository
 	- Là tầng trung gian giữa business logic và data access
+	- ProductInterface dùng khi name của repository product thay đổi, ta phải update lại toàn bộ controller dùng đến nó
 	- Ex:
 		+ Provider config:
 			'providers' => [
@@ -299,69 +300,175 @@ IV/ Other Pattern
 			],
 
 		+ New provider service
-			use App\Contracts\Repositories\PropductRepositoryInterface;
+			use App\Contracts\Repositories\ProductInterface;
 			use App\Repositories\ProductRepository;
 
 			public function register()
 			{
-			   $this->app->bind(ProductRepositoryInterface::class, ProductRepository::class);
+			   $this->app->bind(ProductInterface::class, ProductRepository::class);
 			}
 
 		+ Controller:
 			namespace App\Http\Controllers;
-			use ProductRepositoryInterface;
+			use ProductInterface;
 
 			class ProductController extends Controller
 			{
 				protected $productRepository;
 
-				public function __construct(ProductRepositoryInterface $productRepository)
+				public function __construct(ProductInterface $productRepository)
 				{
 					$this->productRepository = $productRepository;
 				}
 
-				public function getProduct()
+				public function getProducts()
 				{
-					$products = $this->productRepository->getProductOrderById();
+					$products = $this->productRepository->getProducts();
 					return view('product.index', compact('products'));
 				}
 			}
+		+ Base Repository
+			<?php
 
-		+ Repository
-			namespace App\Repositories;
-​
-			use App\Models\Product;
-			​
-			class ProductRepository implements ProductRepositoryInterface
-			{
-			{
-			    //override
-			    public function getProductOrderById()
-			    {
-			        return Product::orderBy('id', 'desc')->get();
-			    }
-			}
+				namespace App\Repositories;
+
+				use App\Repositories\BaseInterface;
+
+				abstract class BaseRepository implements BaseInterface
+				{
+				    //model muốn tương tác
+				    protected $model;
+
+				   //khởi tạo
+				    public function __construct()
+				    {
+					$this->setModel();
+				    }
+
+				    //lấy model tương ứng
+				    abstract public function getModel();
+
+				    /**
+				     * Set model
+				     */
+				    public function setModel()
+				    {
+					$this->model = app()->make(
+					    $this->getModel()
+					);
+				    }
+
+				    public function getAll()
+				    {
+					return $this->model->all();
+				    }
+
+				    public function find($id)
+				    {
+					$result = $this->model->find($id);
+
+					return $result;
+				    }
+
+				    public function create($attributes = [])
+				    {
+					return $this->model->create($attributes);
+				    }
+
+				    public function update($id, $attributes = [])
+				    {
+					$result = $this->find($id);
+					if ($result) {
+					    $result->update($attributes);
+					    return $result;
+					}
+
+					return false;
+				    }
+
+				    public function delete($id)
+				    {
+					$result = $this->find($id);
+					if ($result) {
+					    $result->delete();
+
+					    return true;
+					}
+
+					return false;
+				    }
+				}
 
 		+ Base interface
 			namespace App\Contracts\Repositories;
 
-			interface BaseRepositoryInterface
+			interface BaseInterface
 			{
-			    public function model();
+			    /**
+			     * Get all
+			     * @return mixed
+			     */
 			    public function getAll();
-			    public function create(array $data);
-			    public function show(int $id);
-			    public function edit(int $id);
-			    public function delete(int $id);
-			    ....
+
+			    /**
+			     * Get one
+			     * @param $id
+			     * @return mixed
+			     */
+			    public function find($id);
+
+			    /**
+			     * Create
+			     * @param array $attributes
+			     * @return mixed
+			     */
+			    public function create($attributes = []);
+
+			    /**
+			     * Update
+			     * @param $id
+			     * @param array $attributes
+			     * @return mixed
+			     */
+			    public function update($id, $attributes = []);
+
+			    /**
+			     * Delete
+			     * @param $id
+			     * @return mixed
+			     */
+			    public function delete($id);
 			}
+		
+		+ Product Interface
+			<?php
+			namespace App\Repositories\Product;
 
-		+ interface
-			namespace App\Contracts\Repositories;
+			use App\Repositories\BaseInterface;
 
-			interface ProductRepositoryInterface extends BaseRepositoryInterface
+			interface ProductInterface extends BaseInterface
 			{
-			    public function getFulfilledProduct(int $productId);
-			    public function getProductTags(int $productId);
-			    .....
+			    //ví dụ: lấy 5 sản phầm đầu tiên
+			    public function getProducts();
+			}
+			
+		+ Product Repository
+			<?php
+			namespace App\Repositories\Product;
+			
+			use App\Repositories\ProductInterface;
+			use App\Repositories\BaseRepository;
+
+			class ProductRepository extends BaseRepository implements ProductInterface
+			{
+			    //lấy model tương ứng
+			    public function getModel()
+			    {
+				return \App\Models\Product::class;
+			    }
+
+			    public function getProducts()
+			    {
+				return $this->model->select('product_name')->take(5)->get();
+			    }
 			}
